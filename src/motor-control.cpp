@@ -3,6 +3,8 @@
 #include "pid.h"
 #include <ctime>
 #include <cmath>
+#include <random>       // For engines (mt19937) and distributions
+#include <iostream>
 #include "motor-control.h"
 #include "../custom/include/autonomous.h"
 #include "../custom/include/robot-config.h"
@@ -16,6 +18,16 @@ double x_pos = 0, y_pos = 0;
 double correct_angle = 0;
 // Field config for distance resets, DO NOT CHANGE
 double field_half_size = 70.25;  // Half field size in inches
+
+//2nd Deg->Rad because vscode hates me
+#include <cmath>
+
+constexpr double degToRad(double degrees) {
+  return degrees * M_PI / 180.0;
+}
+constexpr double radToDeg(double radians) {
+  return radians * 180.0 / M_PI;
+}
 
 // ============================================================================
 // CHASSIS CONTROL FUNCTIONS
@@ -785,7 +797,7 @@ void trackNoOdomWheel() {
 }
 
 /*
- * trackXYOdomWheel
+ * MARK: trackXYOdomWheel
  * Tracks the robot’s position using both horizontal and vertical odometry wheels plus inertial heading.
  */
 void trackXYOdomWheel() {
@@ -939,7 +951,7 @@ void turnToPoint(double x, double y, int direction, double time_limit_msec) {
     add = 180; // Add 180 degrees if turning to face backward
   }
   // Calculate target angle using atan2 and normalize
-  double turn_angle = normalizeTarget(radToDeg(atan2(x - x_pos, y - y_pos)) + add);
+  double turn_angle = normalizeTarget(radToDeg(atan2(x - x_pos, y - y_pos))) + add;
   PID pid = PID(turn_kp, turn_ki, turn_kd);
 
   pid.setTarget(turn_angle); // Set PID target
@@ -966,7 +978,7 @@ void turnToPoint(double x, double y, int direction, double time_limit_msec) {
   int index = 1;
   while (!pid.targetArrived() && Brain.timer(msec) - start_time <= time_limit_msec) {
     // Continuously update target as robot moves
-    pid.setTarget(normalizeTarget(radToDeg(atan2(x - x_pos, y - y_pos)) + add));
+    pid.setTarget(normalizeTarget(radToDeg(atan2(x - x_pos, y - y_pos))) + add);
     current_heading = getInertialHeading();
     output = pid.update(current_heading);
 
@@ -1291,62 +1303,74 @@ void boomerang(double x, double y, int dir, double a, double dlead, double time_
  ** - IMPORTANT NOTE FOR THE USER - **
  * - DO NOT CALL THIS FUNCTION DIRECTLY, use the specific direction functions below instead.
  */
-void resetPositionWithSensor(vex::distance& sensor, double s_x, double s_y, double sensor_angle_offset, double field_half_size) {
+void resetPositionWithSensor(vex::distance& sensor, double sensor_offset, double sensor_angle_offset, double field_half_size) {
     double sensorReading = sensor.objectDistance(inches);
   
+    // Check for invalid reading (distance sensors return -1 or very large values when no object detected)
     if (sensorReading < 0 || sensorReading > 200) {
-        return; // Don't reset if reading is clearly garbage
+        Brain.Screen.print("Invalid distance sensor reading: %.2f", sensorReading);
+        return;
     }
     
+    // Get current pose
     double current_heading_deg = getInertialHeading();
-    double sensor_heading_deg = current_heading_deg + sensor_angle_offset;
+    double robot_heading_deg = current_heading_deg + sensor_angle_offset;
     
-    // Normalize to 0–360
-    double heading = fmod(sensor_heading_deg, 360.0);
-    if (heading < 0) heading += 360;
-
+    // Normalize heading to 0-360 range
+    int headingDeg = (int)(robot_heading_deg);
+    headingDeg = (headingDeg + 360) % 360;
+    
+    // Determine which wall we're facing and which axis to reset
     bool resettingX = false;
-    double wallAngle = 0;
     double wallSign = 1.0;
-
-    // Identify which wall we are looking at
-    if (heading <= 45 || heading >= 315)      { resettingX = false; wallAngle = 0;   wallSign = 1.0; }  // North (+Y)
-    else if (heading > 45 && heading <= 135)  { resettingX = true;  wallAngle = 90;  wallSign = 1.0; }  // East (+X)
-    else if (heading > 135 && heading <= 225) { resettingX = false; wallAngle = 180; wallSign = -1.0; } // South (-Y)
-    else                                      { resettingX = true;  wallAngle = 270; wallSign = -1.0; } // West (-X)
-
-    // Calculate the perpendicular distance from sensor to wall
-    double angleErrorRad = (heading - wallAngle) * M_PI / 180.0;
-    double perpendicularDistance = sensorReading * cos(angleErrorRad);
-
-    // Convert robot heading to radians
-    double thetaRad = current_heading_deg * M_PI / 180.0;
-    double rotatedOffset;
-
-    if (resettingX) {
-        // Contribution of the sensor's X/Y physical position to the X-axis distance
-        rotatedOffset = (s_x * cos(thetaRad)) + (s_y * sin(thetaRad));
-    } else {
-        // Contribution of the sensor's X/Y physical position to the Y-axis distance
-        rotatedOffset = (-s_x * sin(thetaRad)) + (s_y * cos(thetaRad));
+    
+    if (315 <= headingDeg || headingDeg <= 45) {
+        // Top wall - reset Y position
+        resettingX = false;
+        wallSign = 1.0;
     }
-
-    // Final Position Calculation
-    double wallToCenter = perpendicularDistance + (wallSign * rotatedOffset);
+    else if (45 < headingDeg && headingDeg <= 135) {
+        // Right wall - reset X position
+        resettingX = true;
+        wallSign = 1.0;
+    }
+    else if (135 < headingDeg && headingDeg <= 225) {
+        // Bottom wall - reset Y position
+        resettingX = false;
+        wallSign = -1.0;
+    }
+    else {
+        // Left wall - reset X position
+        resettingX = true;
+        wallSign = -1.0;
+    }
+    
+    // Calculate distance from wall to robot center
+    double wallToCenter = sensorReading + sensor_offset;
+    
+    // Calculate actual position
     double actualPos = wallSign * (field_half_size - wallToCenter);
+    
+    // Update position (only reset the appropriate axis)
+    if (resettingX) {
+        x_pos = actualPos;
 
-    if (resettingX) x_pos = actualPos; else y_pos = actualPos;
+    } else {
+        y_pos = actualPos;
+
+    }
 }
 
 /*
  * resetPositionFront
  * Resets position using the front distance sensor.
+ * Remember to only use these when perpendicular to the wall!
  * - sensor: Front distance sensor
  * - sensor_offset: Distance offset of the sensor from robot center (in inches)
  * - field_half_size: Half the field dimension (distance from center to wall, in inches)
  */
 void resetPositionFront() {
-    resetPositionWithSensor(front_sensor, front_sensor_offsetX, front_sensor_offsetY, 0.0, field_half_size);
+    resetPositionWithSensor(front_sensor, front_sensor_offset, 0.0, field_half_size);
 }
 
 /*
@@ -1357,34 +1381,139 @@ void resetPositionFront() {
  * - sensor_offset: Distance offset of the sensor from robot center (in inches)
  * - field_half_size: Half the field dimension (distance from center to wall, in inches)
  */
-
 void resetPositionBack() {
-    resetPositionWithSensor(back_sensor, back_sensor_offsetX, back_sensor_offsetY, 180.0, field_half_size);
+    resetPositionWithSensor(back_sensor, back_sensor_offset, 180.0, field_half_size);
 }
-   
 
 /*
  * resetPositionLeft
  * Resets position using the left distance sensor.
+ * Remember to only use these when perpendicular to the wall!
  * - sensor: Left distance sensor
  * - sensor_offset: Distance offset of the sensor from robot center (in inches)
  * - field_half_size: Half the field dimension (distance from center to wall, in inches)
  */
 void resetPositionLeft() {
-    resetPositionWithSensor(left_sensor, left_sensor_offsetX, left_sensor_offsetY, 270.0, field_half_size);
+    resetPositionWithSensor(left_sensor, left_sensor_offset, 270.0, field_half_size);
 }
 
 /*
  * resetPositionRight
  * Resets position using the right distance sensor.
+ * Remember to only use these when perpendicular to the wall!
  * - sensor: Right distance sensor
  * - sensor_offset: Distance offset of the sensor from robot center (in inches)
  * - field_half_size: Half the field dimension (distance from center to wall, in inches)
  */
 void resetPositionRight() {
-    resetPositionWithSensor(right_sensor, right_sensor_offsetX, right_sensor_offsetY, 90.0, field_half_size);
+    resetPositionWithSensor(right_sensor, right_sensor_offset, 90.0, field_half_size);
 }
 
+//MARK: MCL cpp
+
+//Initialize random number generator
+/*
+static std::default_random_engine gen;
+
+//Use random number generator to simulate sensor noise
+double gaussian(double mean, double stddev){
+  std::normal_distribution<double> dist(mean, stddev);
+  return dist(gen);
+}
+
+//Make sure the angle stays within +- pi radians
+//Otherwise, it might reference a turn of -370 degrees instead of 10 degrees
+double normalizeAngle(double a){
+  while(a > M_PI){
+    a -= 2 * M_PI;
+  }
+  while(a < -M_PI){
+    a += 2 * M_PI;
+  }
+  return a;
+}
+
+//Particle reset function
+void MCL::reset(double x, double y, double theta){
+  //clear existing particles
+  particles.clear();
+  //make new ones
+  for(int i = 0; i < 200; i++){
+    particles.push_back({
+      {
+        //random x
+        x + gaussian(0, 0.2),
+        //random y     
+        y + gaussian(0, 0.2),
+        //starting angle     
+        theta                     
+      },
+      //starting probablility (all equally likley)
+      1.0 / 200
+    });
+  }
+}
+//Add in noise to simulate error in the robot's movement
+void MCL::predict(double delta_x, double delta_y, double delta_theta){
+   for (auto &p : particles) {
+    //Move particle forward with error
+    p.pose.x += delta_x + gaussian(0, 0.05);
+    //Move particle sideways
+    p.pose.y += delta_y
+    //Rotate particle to match orientation
+    p.pose.theta = clampAngle(p.pose.theta + delta_theta);
+  }
+}
+void MCL::update(double measuredTheta){
+  double totalWeight = 0.0;
+  for (auto &p : particles) {
+    //Difference between predicted angle and real angle
+    double error = clampAngle(measuredTheta - p.pose.theta);
+    
+    //Convert error into probability using exponential function
+    //Scales error
+    p.weight = exp(-(error * error) / 0.2);
+    totalWeight += p.weight;
+  }
+   //Normalize weights so they sum to 1
+  for (auto &p : particles) {
+    p.weight /= (totalWeight + 1e-6);
+  }
+  // Replace bad particles with better ones
+  resample();
+}
+
+//Replace the bad particles with better ones based on their weights
+void MCL::resample() {
+  //temporarily classify the new Particles
+  std::vector<Particle> newParticles;
+  for(int i = 0; i < particles.size(); i++) {
+    double r = (double)rand() / RAND_MAX;
+    double cumulative = 0;
+    for (auto &p : particles) {
+      cumulative += p.weight;
+      //if the error is more than the random number, add it to the new particles
+      if (cumulative >= r) {
+        newParticles.push_back(p);
+        break;
+      }
+    }
+  }
+  //Replace the old bad particles with the new ones
+  particles = newParticles;
+}
+
+//Estimate the robot's position based on the weighted average of all particles
+Pose MCL::estimate() {
+  Pose avg{0, 0, 0};
+  for (auto &p : particles) {
+    avg.x += p.pose.x * p.weight; 
+    avg.y += p.pose.y * p.weight;
+    avg.theta += p.pose.theta * p.weight;
+  }
+  return avg;
+}
+*/
 // ============================================================================
 // TEMPLATE NOTE
 // ============================================================================
