@@ -14,6 +14,12 @@ extern motor right_chassis1;
 extern motor right_chassis2;
 extern motor right_chassis3;
 extern motor_group right_chassis;
+extern motor left_lift;
+extern motor right_lift;
+extern motor_group lift;
+extern motor left_chainbar;
+extern motor right_chainbar;
+extern motor_group chainbar;
 extern inertial inertial_sensor;
 extern optical example_optical_sensor;
 extern distance example_distance_sensor;
@@ -50,15 +56,11 @@ extern double vertical_tracker_dist_from_center;
 extern double horizontal_tracker_diameter;
 extern double vertical_tracker_diameter;
 
-//Distance Reset Setup
-extern double front_sensor_offsetX;
-extern double front_sensor_offsetY;
-extern double left_sensor_offsetX;
-extern double left_sensor_offsetY;
-extern double right_sensor_offsetX;
-extern double right_sensor_offsetY;
-extern double back_sensor_offsetX;
-extern double back_sensor_offsetY;
+// Distance Reset setup 
+extern double front_sensor_offset;
+extern double left_sensor_offset;
+extern double right_sensor_offset;
+extern double back_sensor_offset;
 
 // Advanced Tuning Parameters
 extern bool heading_correction;
