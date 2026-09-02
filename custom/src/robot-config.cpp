@@ -32,22 +32,22 @@ motor left_chainbar = motor(PORT9, ratio18_1, false);
 motor right_chainbar = motor(PORT10, ratio18_1, true);
 motor_group chainbar = motor_group(left_chainbar, right_chainbar);
 
-inertial inertial_sensor = inertial(PORT7);
+inertial inertial_sensor = inertial(PORT11);
 // optical example_optical_sensor = optical(PORT8);
 // distance example_distance_sensor = distance(PORT9);
-digital_out example_piston = digital_out(Brain.ThreeWirePort.A);
+digital_out claw_piston = digital_out(Brain.ThreeWirePort.A);
 
 // Format is rotation(port, reversed)
 // just set these to random ports if you don't use tracking wheels
-rotation horizontal_tracker = rotation(PORT10, true);
-rotation vertical_tracker = rotation(PORT11, true);
+rotation horizontal_tracker = rotation(PORT16, true);
+rotation vertical_tracker = rotation(PORT17, true);
 
 // Distance reset sensors
 // Set these to random ports if you are not using distance resets
 distance front_sensor = distance(PORT12);
-distance left_sensor = distance(PORT13);
-distance right_sensor = distance(PORT14);
-distance back_sensor = distance(PORT15);
+distance left_sensor = distance(PORT14);
+distance right_sensor = distance(PORT15);
+distance back_sensor = distance(PORT13);
 
 // game specific devices for high stakes
 // motor arm_motor1 = motor(PORT16, ratio18_1, true);
