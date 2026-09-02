@@ -23,7 +23,7 @@ extern motor_group chainbar;
 extern inertial inertial_sensor;
 extern optical example_optical_sensor;
 extern distance example_distance_sensor;
-extern digital_out example_piston;
+extern digital_out claw_piston;
 extern rotation horizontal_tracker;
 extern rotation vertical_tracker;
 extern distance front_sensor;
