@@ -65,7 +65,31 @@ void runDriver() {
 
     // default tank drive or replace it with your preferred driver code here: 
     driveChassis(ch3 * 0.12, ch2 * 0.12);
-
+    
+    //claw piston
+    int claw_piston_state = claw_piston.value();
+    if(button_x && claw_piston_state == 0) {
+      claw_piston.set(false);
+    } else if(button_a && claw_piston_state == 1) {
+    claw_piston.set(true);
+    }
+     if(r1) {
+      //lift up
+      lift.spin(forward, 12, voltageUnits::volt);
+    }
+    if(l1){
+      //lift down
+      lift.spin(reverse, 12, voltageUnits::volt);
+    }
+    if(r2) {
+      //chain bar up
+      chainbar.spin(forward, 12, voltageUnits::volt);
+    }
+    if(l2){
+      //chain bar down
+      chainbar.spin(reverse, 12, voltageUnits::volt);
+    }
+    //for looping
     wait(10, msec); 
   }
 }
