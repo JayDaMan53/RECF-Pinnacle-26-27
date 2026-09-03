@@ -42,6 +42,12 @@ int chassis_flag = 0;
 void runDriver() {
   stopChassis(coast);
   heading_correction = false;
+
+  controller_1.ButtonB.pressed([]() {
+    claw_piston.set(!claw_piston.value());
+  });
+  
+
   while (true) {
     // [-100, 100] for controller stick axis values
     ch1 = controller_1.Axis1.value();
@@ -66,28 +72,31 @@ void runDriver() {
     // default tank drive or replace it with your preferred driver code here: 
     driveChassis(ch3 * 0.12, ch2 * 0.12);
     
-    //claw piston
+    // //claw piston
     int claw_piston_state = claw_piston.value();
-    if(button_x && claw_piston_state == 0) {
-      claw_piston.set(false);
-    } else if(button_a && claw_piston_state == 1) {
-    claw_piston.set(true);
-    }
+    // // only for first press
+    // if() {
+    //   claw_piston.set(!claw_piston_state);
+    // }
+    
      if(r1) {
       //lift up
       lift.spin(forward, 12, voltageUnits::volt);
-    }
-    if(l1){
+    } else if(r2){
       //lift down
       lift.spin(reverse, 12, voltageUnits::volt);
+    } else {
+      lift.stop(hold);
     }
-    if(r2) {
+
+    if(l2) {
       //chain bar up
       chainbar.spin(forward, 12, voltageUnits::volt);
-    }
-    if(l2){
+    } else if(l1) {
       //chain bar down
       chainbar.spin(reverse, 12, voltageUnits::volt);
+    } else {
+      chainbar.stop(hold);
     }
     //for looping
     wait(10, msec); 

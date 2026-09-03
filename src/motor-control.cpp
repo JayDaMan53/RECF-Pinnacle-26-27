@@ -20,14 +20,14 @@ double correct_angle = 0;
 double field_half_size = 70.25;  // Half field size in inches
 
 //2nd Deg->Rad because vscode hates me
-#include <cmath>
+// #include <cmath>
 
-constexpr double degToRad(double degrees) {
-  return degrees * M_PI / 180.0;
-}
-constexpr double radToDeg(double radians) {
-  return radians * 180.0 / M_PI;
-}
+// constexpr double degToRad(double degrees) {
+//   return degrees * M_PI / 180.0;
+// }
+// constexpr double radToDeg(double radians) {
+//   return radians * 180.0 / M_PI;
+// }
 
 // ============================================================================
 // CHASSIS CONTROL FUNCTIONS

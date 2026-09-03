@@ -17,14 +17,14 @@ controller controller_1 = controller(primary);
 // gearSetting is one of the following: ratio36_1(red), ratio18_1(green), ratio6_1(blue)
 // all chassis motors should be reversed appropriately so that they spin vertical when given a positive voltage input
 // such as driveChassis(12, 12)
-motor left_chassis1 = motor(PORT1, ratio6_1, true);
-motor left_chassis2 = motor(PORT2, ratio6_1, false);
-motor left_chassis3 = motor(PORT3, ratio6_1, true);
-motor_group left_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
-motor right_chassis1 = motor(PORT4, ratio6_1, false);
-motor right_chassis2 = motor(PORT5, ratio6_1, true);
-motor right_chassis3 = motor(PORT6, ratio6_1, false);
-motor_group right_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
+motor right_chassis1 = motor(PORT1, ratio6_1, false);
+motor right_chassis2 = motor(PORT2, ratio6_1, true);
+motor right_chassis3 = motor(PORT3, ratio6_1, false);
+motor_group right_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
+motor left_chassis1 = motor(PORT4, ratio6_1, true);
+motor left_chassis2 = motor(PORT5, ratio6_1, false);
+motor left_chassis3 = motor(PORT6, ratio6_1, true);
+motor_group left_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
 motor left_lift = motor(PORT7, ratio6_1, false);
 motor right_lift = motor(PORT8, ratio6_1, true);
 motor_group lift = motor_group(left_lift, right_lift);
@@ -50,16 +50,16 @@ distance right_sensor = distance(PORT15);
 distance back_sensor = distance(PORT13);
 
 // game specific devices for high stakes
-// motor arm_motor1 = motor(PORT16, ratio18_1, true);
-// motor arm_motor2 = motor(PORT17, ratio18_1, false);
-// motor_group arm_motor = motor_group(arm_motor1, arm_motor2);
-// motor intake_motor = motor(PORT18, ratio18_1, true);
-// digital_out claw = digital_out(Brain.ThreeWirePort.B);
-// digital_out rush_arm = digital_out(Brain.ThreeWirePort.C);
-// optical optical_sensor = optical(PORT19);
-// distance intake_distance = distance(PORT20);
-// distance clamp_distance = distance(PORT21);
-// digital_out mogo_mech = digital_out(Brain.ThreeWirePort.D);
+motor arm_motor1 = motor(PORT16, ratio18_1, true);
+motor arm_motor2 = motor(PORT17, ratio18_1, false);
+motor_group arm_motor = motor_group(arm_motor1, arm_motor2);
+motor intake_motor = motor(PORT18, ratio18_1, true);
+digital_out claw = digital_out(Brain.ThreeWirePort.B);
+digital_out rush_arm = digital_out(Brain.ThreeWirePort.C);
+optical optical_sensor = optical(PORT19);
+distance intake_distance = distance(PORT20);
+distance clamp_distance = distance(PORT21);
+digital_out mogo_mech = digital_out(Brain.ThreeWirePort.D);
 //MARK: CHANGE
 // ============================================================================
 // USER-CONFIGURABLE PARAMETERS (CHANGE BEFORE USING THIS TEMPLATE)
