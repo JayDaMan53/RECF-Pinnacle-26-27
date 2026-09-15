@@ -2,6 +2,10 @@
 #include "motor-control.h"
 #include "autonomous.h"
 #include "robot-config.h"
+#include "chainbar-pid.h"
+
+ChainbarPIDConfig chainbarConfig;
+ChainbarPID chainbarPID(chainbarConfig);
 
 // Modify autonomous, driver, or pre-auton code below
 
@@ -15,7 +19,7 @@ void runAutonomous() {
       exampleAuton2();
       break;  
     case 3:
-      redGoalRush();
+      // redGoalRush();
       break;
     case 4:
       break; 
@@ -47,6 +51,7 @@ void runDriver() {
     claw_piston.set(!claw_piston.value());
   });
   
+  chainbarPID.setTarget(chainbarPID.position());
 
   while (true) {
     // [-100, 100] for controller stick axis values
@@ -89,15 +94,24 @@ void runDriver() {
       lift.stop(hold);
     }
 
-    if(l2) {
-      //chain bar up
-      chainbar.spin(forward, 12, voltageUnits::volt);
-    } else if(l1) {
-      //chain bar down
-      chainbar.spin(reverse, 12, voltageUnits::volt);
-    } else {
-      chainbar.stop(hold);
+    // if(l2) {
+    //   //chain bar up
+    //   chainbar.spin(forward, 12, voltageUnits::volt);
+    // } else if(l1) {
+    //   //chain bar down
+    //   chainbar.spin(reverse, 12, voltageUnits::volt);
+    // } else {
+    //   chainbar.stop(hold);
+    // }
+
+    if (l2 && chainbarPID.target() != chainbarConfig.maxDegrees) {
+      chainbarPID.setTarget(chainbarConfig.maxDegrees);
+    } else if (l1 && chainbarPID.target() != chainbarConfig.minDegrees) {
+      chainbarPID.setTarget(chainbarConfig.minDegrees);
     }
+
+    chainbarPID.update(0.010);
+
     //for looping
     wait(10, msec); 
   }
@@ -106,6 +120,8 @@ void runDriver() {
 void runPreAutonomous() {
     // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
+
+  chainbarPID.zeroAt(0.0);
   
   // Calibrate inertial sensor
   inertial_sensor.calibrate();

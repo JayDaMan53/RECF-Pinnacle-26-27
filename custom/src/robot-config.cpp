@@ -39,7 +39,7 @@ digital_out claw_piston = digital_out(Brain.ThreeWirePort.A);
 
 // Format is rotation(port, reversed)
 // just set these to random ports if you don't use tracking wheels
-rotation horizontal_tracker = rotation(PORT16, true);
+// rotation horizontal_tracker = rotation(PORT16, true);
 rotation vertical_tracker = rotation(PORT17, true);
 
 // Distance reset sensors
@@ -49,17 +49,6 @@ distance left_sensor = distance(PORT14);
 distance right_sensor = distance(PORT15);
 distance back_sensor = distance(PORT13);
 
-// game specific devices for high stakes
-motor arm_motor1 = motor(PORT16, ratio18_1, true);
-motor arm_motor2 = motor(PORT17, ratio18_1, false);
-motor_group arm_motor = motor_group(arm_motor1, arm_motor2);
-motor intake_motor = motor(PORT18, ratio18_1, true);
-digital_out claw = digital_out(Brain.ThreeWirePort.B);
-digital_out rush_arm = digital_out(Brain.ThreeWirePort.C);
-optical optical_sensor = optical(PORT19);
-distance intake_distance = distance(PORT20);
-distance clamp_distance = distance(PORT21);
-digital_out mogo_mech = digital_out(Brain.ThreeWirePort.D);
 //MARK: CHANGE
 // ============================================================================
 // USER-CONFIGURABLE PARAMETERS (CHANGE BEFORE USING THIS TEMPLATE)
@@ -80,7 +69,7 @@ double turn_kp = 9, turn_ki = 0, turn_kd = 60;
 double heading_correction_kp = 0.6, heading_correction_ki = 0, heading_correction_kd = 4;
 
 // Enable or disable the use of tracking wheels
-bool using_horizontal_tracker = true;  // Set to true if a horizontal tracking wheel is installed and used for odometry
+bool using_horizontal_tracker = false;  // Set to true if a horizontal tracking wheel is installed and used for odometry
 bool using_vertical_tracker = true;   // Set to true if a vertical tracking wheel is installed and used for odometry
 
 // IGNORE THESE IF YOU ARE NOT USING TRACKING WHEELS
