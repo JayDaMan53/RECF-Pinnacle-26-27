@@ -17,22 +17,22 @@ controller controller_1 = controller(primary);
 // gearSetting is one of the following: ratio36_1(red), ratio18_1(green), ratio6_1(blue)
 // all chassis motors should be reversed appropriately so that they spin vertical when given a positive voltage input
 // such as driveChassis(12, 12)
-motor right_chassis1 = motor(PORT1, ratio6_1, false);
-motor right_chassis2 = motor(PORT2, ratio6_1, true);
-motor right_chassis3 = motor(PORT3, ratio6_1, false);
+motor right_chassis1 = motor(PORT16, ratio6_1, false);
+motor right_chassis2 = motor(PORT14, ratio6_1, true);
+motor right_chassis3 = motor(PORT11, ratio6_1, false);
 motor_group right_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
-motor left_chassis1 = motor(PORT20, ratio6_1, true);
-motor left_chassis2 = motor(PORT5, ratio6_1, false);
-motor left_chassis3 = motor(PORT6, ratio6_1, true);
+motor left_chassis1 = motor(PORT15, ratio6_1, true);
+motor left_chassis2 = motor(PORT12, ratio6_1, false);
+motor left_chassis3 = motor(PORT13, ratio6_1, true);
 motor_group left_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
-motor left_lift = motor(PORT7, ratio6_1, false);
-motor right_lift = motor(PORT8, ratio6_1, true);
+motor left_lift = motor(PORT19, ratio6_1, false);
+motor right_lift = motor(PORT20, ratio6_1, true);
 motor_group lift = motor_group(left_lift, right_lift);
-motor left_chainbar = motor(PORT9, ratio18_1, false);
-motor right_chainbar = motor(PORT10, ratio18_1, true);
+motor left_chainbar = motor(PORT17, ratio18_1, false);
+motor right_chainbar = motor(PORT18, ratio18_1, true);
 motor_group chainbar = motor_group(left_chainbar, right_chainbar);
 
-inertial inertial_sensor = inertial(PORT11);
+inertial inertial_sensor = inertial(PORT5);
 // optical example_optical_sensor = optical(PORT8);
 // distance example_distance_sensor = distance(PORT9);
 digital_out claw_piston = digital_out(Brain.ThreeWirePort.A);
@@ -40,14 +40,14 @@ digital_out claw_piston = digital_out(Brain.ThreeWirePort.A);
 // Format is rotation(port, reversed)
 // just set these to random ports if you don't use tracking wheels
 // rotation horizontal_tracker = rotation(PORT16, true);
-rotation vertical_tracker = rotation(PORT17, true);
+rotation vertical_tracker = rotation(PORT6, true);
 
 // Distance reset sensors
 // Set these to random ports if you are not using distance resets
-distance front_sensor = distance(PORT12);
-distance left_sensor = distance(PORT14);
-distance right_sensor = distance(PORT15);
-distance back_sensor = distance(PORT13);
+distance front_sensor = distance(PORT9);
+distance left_sensor = distance(PORT8);
+distance right_sensor = distance(PORT10);
+distance back_sensor = distance(PORT7);
 
 //MARK: CHANGE
 // ============================================================================
