@@ -52,6 +52,7 @@ void runDriver() {
   });
   
   chainbarPID.setTarget(chainbarPID.position());
+  bool chainbarWasMoving = false;
 
   while (true) {
     // [-100, 100] for controller stick axis values
@@ -104,10 +105,12 @@ void runDriver() {
     //   chainbar.stop(hold);
     // }
 
-    if (l2 && chainbarPID.target() != chainbarConfig.maxDegrees) {
-      chainbarPID.setTarget(chainbarConfig.maxDegrees);
-    } else if (l1 && chainbarPID.target() != chainbarConfig.minDegrees) {
-      chainbarPID.setTarget(chainbarConfig.minDegrees);
+    if (l2 != l1) {
+      chainbarPID.move(l2 ? 1 : -1);
+      chainbarWasMoving = true;
+    } else if (chainbarWasMoving) {
+      chainbarPID.hold();
+      chainbarWasMoving = false;
     }
 
     chainbarPID.update(0.010);

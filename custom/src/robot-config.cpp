@@ -17,14 +17,14 @@ controller controller_1 = controller(primary);
 // gearSetting is one of the following: ratio36_1(red), ratio18_1(green), ratio6_1(blue)
 // all chassis motors should be reversed appropriately so that they spin vertical when given a positive voltage input
 // such as driveChassis(12, 12)
-motor right_chassis1 = motor(PORT16, ratio6_1, false);
-motor right_chassis2 = motor(PORT14, ratio6_1, true);
-motor right_chassis3 = motor(PORT11, ratio6_1, false);
-motor_group right_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
-motor left_chassis1 = motor(PORT15, ratio6_1, true);
-motor left_chassis2 = motor(PORT12, ratio6_1, false);
-motor left_chassis3 = motor(PORT13, ratio6_1, true);
-motor_group left_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
+motor right_chassis1 = motor(PORT16, ratio6_1, true);
+motor right_chassis2 = motor(PORT14, ratio6_1, false);
+motor right_chassis3 = motor(PORT11, ratio6_1, true);
+motor_group right_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
+motor left_chassis1 = motor(PORT15, ratio6_1, false);
+motor left_chassis2 = motor(PORT12, ratio6_1, true);
+motor left_chassis3 = motor(PORT13, ratio6_1, false);
+motor_group left_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
 motor left_lift = motor(PORT19, ratio6_1, false);
 motor right_lift = motor(PORT20, ratio6_1, true);
 motor_group lift = motor_group(left_lift, right_lift);
@@ -39,7 +39,7 @@ digital_out claw_piston = digital_out(Brain.ThreeWirePort.A);
 
 // Format is rotation(port, reversed)
 // just set these to random ports if you don't use tracking wheels
-// rotation horizontal_tracker = rotation(PORT16, true);
+rotation horizontal_tracker = rotation(PORT16, true);
 rotation vertical_tracker = rotation(PORT6, true);
 
 // Distance reset sensors
